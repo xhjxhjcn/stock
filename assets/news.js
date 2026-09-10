@@ -122,9 +122,14 @@
     }).join('') + '</ul>';
   }
 
-  renderLeftNav();
-  renderCalendar();
-  renderCenter();
-  renderRanking();
-  renderTopic();
+  function renderAll() {
+    renderLeftNav();
+    renderCalendar();
+    renderCenter();
+    renderRanking();
+    renderTopic();
+  }
+  renderAll();
+  /* 暴露给 feed.js：拉到真实新闻后重渲染（保留 window.NEWS 上的静态兜底） */
+  window.renderNews = renderAll;
 })();

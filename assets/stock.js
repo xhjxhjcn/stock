@@ -11,6 +11,7 @@
   var DEFAULT = ['sh000001', 'sz399001', 'sz399006', 'sh600519', 'sz300750', 'sz002594', 'hk00700'];
   var body = document.getElementById('stock-body');
   var statusEl = document.getElementById('stock-status');
+  var lastStocks = [];        // 最近一次渲染的自选股，供分时图补绘
 
   function getCodes() {
     try {
@@ -89,23 +90,150 @@
     });
   }
 
+  /* ===== 当日分时走势 =====
+   * 主源：腾讯 web.ifzq.gtimg.cn/appstock/app/minute/query?_var=<cb>
+   *       返回 `<cb>={...}`，用 script 标签注入（无 CORS 问题，服务端未下发 nosniff）
+   * 兜底：东方财富 push2 trends2 JSONP
+   * 分时数据每分钟才变，故 5 分钟拉一次；价格仍按 8s 轮询。
+   */
+  var minuteCache = {};       // code -> number[]（当日分时价格序列）
+  var minuteBusy = false;
+  var lastMinuteAt = 0;
+  var MINUTE_TTL = 5 * 60 * 1000;
+
+  function fetchMinuteTx(code) {
+    return new Promise(function (res) {
+      var cb = '_mincb' + Math.random().toString(36).slice(2, 10);
+      var s = document.createElement('script');
+      var done = false;
+      function finish(val) {
+        if (done) return; done = true;
+        try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+        if (s.parentNode) s.parentNode.removeChild(s);
+        res(val);
+      }
+      s.onload = function () {
+        var arr = [];
+        try {
+          var node = window[cb] && window[cb].data && window[cb].data[code];
+          var rows = node && node.data && node.data.data;
+          if (rows && rows.length) {
+            for (var i = 0; i < rows.length; i++) {
+              var v = parseFloat(String(rows[i]).split(/\s+/)[1]);
+              if (v > 0) arr.push(v);
+            }
+          }
+        } catch (e) {}
+        finish(arr);
+      };
+      s.onerror = function () { finish([]); };
+      s.src = 'https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=' + code + '&_var=' + cb;
+      document.head.appendChild(s);
+      setTimeout(function () { finish([]); }, 6000);
+    });
+  }
+
+  function fetchMinuteEm(code) {
+    return new Promise(function (res) {
+      var secid = toSecid(code);
+      if (!secid) { res([]); return; }
+      var cb = '_emmin' + Math.random().toString(36).slice(2, 10);
+      var s = document.createElement('script');
+      var done = false;
+      function finish(val) {
+        if (done) return; done = true;
+        try { delete window[cb]; } catch (e) {}
+        if (s.parentNode) s.parentNode.removeChild(s);
+        res(val);
+      }
+      window[cb] = function (data) {
+        var arr = [];
+        try {
+          var tr = data && data.data && data.data.trends;
+          if (tr && tr.length) {
+            for (var i = 0; i < tr.length; i++) {
+              var v = parseFloat(String(tr[i]).split(',')[2]);   // 第3列=当前价
+              if (v > 0) arr.push(v);
+            }
+          }
+        } catch (e) {}
+        finish(arr);
+      };
+      s.onerror = function () { finish([]); };
+      s.src = 'https://push2.eastmoney.com/api/qt/stock/trends2/get?secid=' + secid
+        + '&fields1=f1,f2,f3,f4,f5&fields2=f51,f52,f53,f54,f55,f56,f57,f58&iscr=0&ndays=1&cb=' + cb;
+      document.head.appendChild(s);
+      setTimeout(function () { finish([]); }, 6000);
+    });
+  }
+
+  /* 补齐缺失/过期的分时序列，成功后重绘（不影响价格轮询） */
+  function loadMinutes(codes) {
+    var now = Date.now();
+    if (minuteBusy || (now - lastMinuteAt) < MINUTE_TTL) return;
+    var need = codes.filter(function (c) { return !minuteCache[c] || !minuteCache[c].length; });
+    lastMinuteAt = now;
+    if (!need.length) return;
+    minuteBusy = true;
+    Promise.all(need.map(function (c) {
+      return fetchMinuteTx(c).then(function (a) {
+        return (a && a.length) ? a : fetchMinuteEm(c);
+      }).then(function (a) { if (a && a.length) minuteCache[c] = a; })
+        .catch(function () {});
+    })).then(function () {
+      minuteBusy = false;
+      if (lastStocks.length) render(lastStocks);
+    });
+  }
+
+  /* 迷你走势图：内联 SVG，虚线=昨收基准，红涨绿跌 */
+  function sparkline(prices, prevClose, last) {
+    if (!prices || prices.length < 2) return '<span class="spark-na">—</span>';
+    var w = 56, h = 18, pad = 1;
+    var min = prevClose, max = prevClose, i;
+    for (i = 0; i < prices.length; i++) {
+      if (prices[i] < min) min = prices[i];
+      if (prices[i] > max) max = prices[i];
+    }
+    var span = (max - min) || (prevClose * 0.001) || 1;
+    var n = prices.length, pts = [];
+    for (i = 0; i < n; i++) {
+      var x = pad + (w - pad * 2) * (i / (n - 1));
+      var y = pad + (h - pad * 2) * (1 - (prices[i] - min) / span);
+      pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+    }
+    var baseY = (pad + (h - pad * 2) * (1 - (prevClose - min) / span)).toFixed(1);
+    var up = (last != null ? last : prices[n - 1]) >= prevClose;
+    var color = up ? '#e22' : '#0a9a4a';
+    var fill = up ? 'rgba(226,34,34,.12)' : 'rgba(10,154,74,.12)';
+    var line = pts.join(' ');
+    var area = pad + ',' + (h - pad) + ' ' + line + ' ' + (w - pad) + ',' + (h - pad);
+    return '<svg class="spark-svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">'
+      + '<line x1="0" y1="' + baseY + '" x2="' + w + '" y2="' + baseY + '" stroke="#ccc" stroke-width="1" stroke-dasharray="2,2"/>'
+      + '<polygon points="' + area + '" fill="' + fill + '"/>'
+      + '<polyline points="' + line + '" fill="none" stroke="' + color + '" stroke-width="1.2" stroke-linejoin="round"/>'
+      + '</svg>';
+  }
+
   function fmtTime(d) {
     function p(n) { return (n < 10 ? '0' : '') + n; }
     return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
   }
 
   function render(stocks) {
-    if (!stocks.length) { body.innerHTML = '<div class="loading">暂无数据，点「编辑」添加股票代码</div>'; return; }
-    var html = '<table class="stock-table"><thead><tr><th>名称 / 代码</th><th>最新价</th><th>涨跌幅</th></tr></thead><tbody>';
-    stocks.forEach(function (s) {
+    lastStocks = stocks || [];
+    if (!lastStocks.length) { body.innerHTML = '<div class="loading">暂无数据，点「编辑」添加股票代码</div>'; return; }
+    var html = '<table class="stock-table"><thead><tr><th>名称</th><th>最新价</th><th>涨跌幅</th><th class="th-spark">分时</th></tr></thead><tbody>';
+    lastStocks.forEach(function (s) {
       var chg = (s.price - s.prevClose) / s.prevClose * 100;
       var cls = chg > 0 ? 'up' : (chg < 0 ? 'down' : 'flat');
       var arrow = chg > 0 ? '▲' : (chg < 0 ? '▼' : '—');
       var idxCls = isIndex(s.code) ? ' idx' : '';
       html += '<tr class="' + idxCls + '">'
-        + '<td class="name"><b>' + esc(s.name) + '</b> <small>' + s.code.toUpperCase() + '</small></td>'
+        + '<td class="name"><b>' + esc(s.name) + '</b></td>'
         + '<td class="' + cls + '">' + s.price.toFixed(2) + '</td>'
         + '<td class="' + cls + '">' + arrow + ' ' + Math.abs(chg).toFixed(2) + '%</td>'
+        + '<td class="spark" title="当日分时走势">' + sparkline(minuteCache[s.code], s.prevClose, s.price) + '</td>'
         + '</tr>';
     });
     html += '</tbody></table>';
@@ -125,6 +253,7 @@
       merged.sort(function (a, b) { return codes.indexOf(a.code) - codes.indexOf(b.code); });
       var finalList = merged.filter(function (s) { return codes.indexOf(s.code) >= 0; });
       render(finalList);
+      loadMinutes(codes);
       setStatus('更新于 ' + fmtTime(new Date()) + (isTrading() ? '（交易中）' : '（非交易时段）'));
     }).catch(function (e) {
       setStatus('刷新失败：' + (e && e.message || e));
@@ -259,6 +388,8 @@
     codes = Array.from(new Set(codes));
     if (!codes.length) { flashTip('还没有任何股票，先添加几只吧'); return; }
     setCodes(codes);
+    minuteCache = {};      // 自选变动，分时序列作废重拉
+    lastMinuteAt = 0;
     closeEdit();
     refresh();
   }

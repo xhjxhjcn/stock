@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小站财经 — 徐宏江的个人财经门户</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- 顶部细条 -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <span id="today-date">----年--月--日 星期-</span>
+    <span class="topbar-right">
+      <a href="https://www.xhja.cn" target="_blank" rel="noopener">我的小站</a>
+      <span class="sep">|</span>
+      <a href="#" onclick="return false">设为首页</a>
+      <span class="sep">|</span>
+      <a href="#" onclick="return false">加入收藏</a>
+    </span>
+  </div>
+</div>
+
+<!-- logo + 搜索 -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-cn">小站财经</span>
+      <span class="logo-en">XHJ FINANCE</span>
+      <span class="logo-sub">结构工程师的私人看盘台</span>
+    </div>
+    <form class="search" onsubmit="return doSearch()">
+      <input id="search-input" type="text" placeholder="搜股票代码 / 名称，如 600519 或 贵州茅台">
+      <button type="submit">搜 索</button>
+    </form>
+  </div>
+</div>
+
+<!-- 红色频道导航 -->
+<div class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-home">首页</a>
+    <a href="https://finance.sina.com.cn" target="_blank" rel="noopener">财经</a>
+    <a href="https://stockapp.finance.qq.com" target="_blank" rel="noopener">股票</a>
+    <a href="https://fund.eastmoney.com" target="_blank" rel="noopener">基金</a>
+    <a href="https://stock.finance.sina.com.cn/hkstock/" target="_blank" rel="noopener">港股</a>
+    <a href="https://finance.sina.com.cn/usstock/" target="_blank" rel="noopener">美股</a>
+    <a href="https://www.chinamoney.com.cn" target="_blank" rel="noopener">外汇</a>
+    <a href="https://money.163.com" target="_blank" rel="noopener">理财</a>
+    <a href="https://www.fang.com" target="_blank" rel="noopener">房产</a>
+    <a href="https://auto.qq.com" target="_blank" rel="noopener">汽车</a>
+    <a href="https://tech.qq.com" target="_blank" rel="noopener">科技</a>
+    <a href="https://www.xhja.cn" target="_blank" rel="noopener">博客</a>
+  </div>
+</div>
+
+<!-- 主体 -->
+<div class="wrap">
+  <!-- 左栏：财经头条 -->
+  <div class="col-main" id="news-col">
+    <div class="loading">财经头条加载中…</div>
+  </div>
+
+  <!-- 右栏 -->
+  <aside class="col-side">
+    <!-- 右上角股票自选小窗 -->
+    <div class="box stock-box" id="stock-widget">
+      <div class="box-hd">
+        <span class="box-title">我的自选股</span>
+        <span class="box-ops">
+          <a href="#" id="btn-edit" onclick="return false">编辑</a>
+          <a href="#" id="btn-refresh" onclick="return false">刷新</a>
+        </span>
+      </div>
+      <div class="box-bd" id="stock-body">
+        <div class="loading">行情加载中…</div>
+      </div>
+      <div class="box-ft" id="stock-status">—</div>
+    </div>
+
+    <!-- 基金净值排行（静态示例） -->
+    <div class="box">
+      <div class="box-hd"><span class="box-title">净值排行</span><span class="box-ops"><a href="https://fund.eastmoney.com" target="_blank" rel="noopener">更多</a></span></div>
+      <div class="box-bd">
+        <ul class="mini-list">
+          <li><span>易方达蓝筹精选</span><span class="up">+1.82%</span></li>
+          <li><span>中欧医疗健康</span><span class="down">-0.54%</span></li>
+          <li><span>华夏上证50ETF</span><span class="up">+0.63%</span></li>
+          <li><span>富国天惠成长</span><span class="up">+0.41%</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 外汇牌价（静态示例） -->
+    <div class="box">
+      <div class="box-hd"><span class="box-title">外汇牌价</span><span class="box-ops"><a href="https://www.chinamoney.com.cn" target="_blank" rel="noopener">更多</a></span></div>
+      <div class="box-bd">
+        <ul class="mini-list">
+          <li><span>美元/人民币</span><span>7.1820</span></li>
+          <li><span>欧元/人民币</span><span>7.8050</span></li>
+          <li><span>港币/人民币</span><span>0.9210</span></li>
+          <li><span>日元/人民币</span><span>4.7320</span></li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- 页脚 -->
+<footer class="footer">
+  <p>小站财经 · 个人财经门户 · 行情数据来自腾讯财经 / 东方财富（仅供参考，不构成投资建议）</p>
+  <p>© 2026 徐宏江 · <a href="https://www.xhja.cn" target="_blank" rel="noopener">xhja.cn</a></p>
+</footer>
+
+<!-- 编辑自选股弹窗 -->
+<div class="modal-mask" id="edit-modal">
+  <div class="modal">
+    <div class="modal-hd">编辑自选股</div>
+    <div class="modal-bd">
+      <p class="tip">每行一个，格式：<code>sh600519</code> / <code>sz300750</code> / <code>hk00700</code>（前缀 sh=沪 sz=深 hk=港 bj=北交所）。也可逗号分隔。</p>
+      <textarea id="edit-codes" rows="10"></textarea>
+    </div>
+    <div class="modal-ft">
+      <button id="btn-save" class="btn-primary">保存</button>
+      <button id="btn-cancel" class="btn-default">取消</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/news-data.js"></script>
+<script src="assets/news.js"></script>
+<script src="assets/stock.js"></script>
+</body>
+</html>

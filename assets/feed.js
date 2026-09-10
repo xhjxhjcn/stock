@@ -8,6 +8,12 @@
   var LID = '2510';   // 新浪「财经」滚动栏目
   var NUM = 30;
 
+  /* 热点专题数据源：另开一个频道，避免和要闻/头条榜重复
+   * 可用 lid（实测）：2510财经 2511国际 2512彩票 2513娱乐 2514观察者 2515科技 2516港股 2669综合
+   * 想换频道，改下面这一行的数字即可。 */
+  var TOPIC_LID = '2516';   // 新浪「港股」
+  var TOPIC_NUM = 12;
+
   function imgOf(it) {
     var im = it && it.img;
     if (im && typeof im === 'object' && im.u) return im.u.replace(/^http:/, 'https:');
@@ -55,9 +61,27 @@
     } catch (e) { /* 静默：保留静态兜底 */ }
   };
 
+  /* 热点专题：港股频道实时拉取，失败则保留 news.js 里的静态兜底 */
+  window.sinaTopicCB = function (data) {
+    try {
+      var list = (data && data.result && data.result.data) || [];
+      if (!list.length) return;
+      window.NEWS.topics = list.slice(0, 6).map(function (it) {
+        return { t: it.title || '', u: it.url || '#', s: it.media_name || '' };
+      });
+      if (window.renderNews) window.renderNews();
+    } catch (e) { /* 静默：保留静态兜底 */ }
+  };
+
   var s = document.createElement('script');
   s.src = 'https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=' + LID + '&num=' + NUM + '&page=1&callback=sinaFeedCB';
   s.onerror = function () { /* 网络失败：保留静态数据 */ };
   document.head.appendChild(s);
   setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 10000);
+
+  var s2 = document.createElement('script');
+  s2.src = 'https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=' + TOPIC_LID + '&num=' + TOPIC_NUM + '&page=1&callback=sinaTopicCB';
+  s2.onerror = function () { /* 网络失败：保留静态数据 */ };
+  document.head.appendChild(s2);
+  setTimeout(function () { if (s2.parentNode) s2.parentNode.removeChild(s2); }, 10000);
 })();

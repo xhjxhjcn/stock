@@ -16,7 +16,7 @@ window.NEWS = {
   headline: {
     title: "A股三大指数震荡收评，结构性行情延续",
     summary: "今日市场呈现板块快速轮动特征，资金围绕政策主线与业绩确定性展开博弈，两市成交额较前一交易日小幅放量，北向资金午后回流。",
-    img: { hue: 0, kind: 'chart', label: '盘面' },
+    img: 'https://n.sinaimg.cn/finance/transform/186/w702h284/20260910/cdcb-0b1cc8daf4616993594c2f6e668e39dc.png',
     links: [
       { t: "盘后机构观点汇总", u: "https://finance.sina.com.cn" },
       { t: "北向资金今日动向", u: "https://data.eastmoney.com/hsgt/" },
@@ -38,20 +38,20 @@ window.NEWS = {
 
   /* 图文卡片：3 个一排 */
   featured: [
-    { cat: "证券市场", t: "成交额重回万亿，结构性机会在哪", u: "https://stockapp.finance.qq.com", img: { hue: 0, kind: 'chart', label: '股市' } },
-    { cat: "公司产业", t: "半导体国产化加速，设备材料迎机遇", u: "https://stock.finance.sina.com.cn", img: { hue: 28, kind: 'building', label: '产业' } },
-    { cat: "基金理财", t: "权益基金发行回暖，主动管理受关注", u: "https://fund.eastmoney.com", img: { hue: 140, kind: 'coin', label: '理财' } },
-    { cat: "宏观政策", t: "8月物价数据点评：温和复苏延续", u: "https://www.stats.gov.cn", img: { hue: 205, kind: 'globe', label: '宏观' } },
-    { cat: "国际财经", t: "美联储表态偏鹰，美债收益率上行", u: "https://finance.sina.com.cn/usstock/", img: { hue: 260, kind: 'globe', label: '国际' } },
-    { cat: "房产汽车", t: "新能源车8月交付亮眼，以旧换新加码", u: "https://auto.qq.com", img: { hue: 200, kind: 'building', label: '房产' } }
+    { cat: "证券市场", t: "成交额重回万亿，结构性机会在哪", u: "https://stockapp.finance.qq.com", img: 'https://n.sinaimg.cn/finance/transform/162/w550h412/20260910/999e-fb8ce067ba961598bbb12389a7b9dc99.jpg' },
+    { cat: "公司产业", t: "半导体国产化加速，设备材料迎机遇", u: "https://stock.finance.sina.com.cn", img: 'https://n.sinaimg.cn/finance/transform/162/w550h412/20260910/93c5-98b038b53727ca683031e45a0c303c90.jpg' },
+    { cat: "基金理财", t: "权益基金发行回暖，主动管理受关注", u: "https://fund.eastmoney.com", img: 'https://nimg.ws.126.net/?url=http%3A%2F%2Fcms-bucket.ws.126.net%2F2026%2F0910%2F9ae800d1p00tl4l8x003oc0007s003wc.png' },
+    { cat: "宏观政策", t: "8月物价数据点评：温和复苏延续", u: "https://www.stats.gov.cn", img: 'https://nimg.ws.126.net/?url=http%3A%2F%2Fcms-bucket.ws.126.net%2F2026%2F0910%2Fa4538f31j00tl3y8e00auc000s600e3c.jpg' },
+    { cat: "国际财经", t: "美联储表态偏鹰，美债收益率上行", u: "https://finance.sina.com.cn/usstock/", img: 'https://nimg.ws.126.net/?url=http%3A%2F%2Fcms-bucket.ws.126.net%2F2026%2F0909%2F0dc59eadp00tl3tky004yc000s600e3c.png' },
+    { cat: "房产汽车", t: "新能源车8月交付亮眼，以旧换新加码", u: "https://auto.qq.com", img: 'https://nimg.ws.126.net/?url=http%3A%2F%2Fcms-bucket.ws.126.net%2F2026%2F0909%2Ff8c595d3p00tl3bic0075c000s600e3c.png' }
   ],
 
   /* 图片新闻：横排缩略图 */
   gallery: [
-    { t: "直击上市公司业绩说明会", u: "https://finance.sina.com.cn", img: { hue: 18, kind: 'news', label: '现场' } },
-    { t: "交易所交易大厅见闻", u: "https://stockapp.finance.qq.com", img: { hue: 210, kind: 'chart', label: '交易' } },
-    { t: "产业调研：龙头工厂产线", u: "https://stock.finance.sina.com.cn", img: { hue: 30, kind: 'building', label: '调研' } },
-    { t: "财富管理论坛聚焦长期资金", u: "https://fund.eastmoney.com", img: { hue: 140, kind: 'coin', label: '论坛' } }
+    { t: "直击上市公司业绩说明会", u: "https://finance.sina.com.cn", img: 'https://nimg.ws.126.net/?url=http%3A%2F%2Fcms-bucket.ws.126.net%2F2026%2F0910%2F20be9e43p00tl4p8c007kc000s600e3c.png' },
+    { t: "交易所交易大厅见闻", u: "https://stockapp.finance.qq.com", img: 'https://nimg.ws.126.net/?url=http%3A%2F%2Fcms-bucket.ws.126.net%2F2026%2F0909%2F2397ea8fj00tl2r2n01lcc000s600e3c.jpg' },
+    { t: "产业调研：龙头工厂产线", u: "https://stock.finance.sina.com.cn", img: 'https://nimg.ws.126.net/?url=http%3A%2F%2Fcms-bucket.ws.126.net%2F2026%2F0908%2F59c5c4ecp00tl19uj01a8c0009c0070c.png' },
+    { t: "财富管理论坛聚焦长期资金", u: "https://fund.eastmoney.com", img: 'https://nimg.ws.126.net/?url=http%3A%2F%2Fcms-bucket.ws.126.net%2F2026%2F0903%2Ff6196d03j00tks7k1001zd000zk00k0m.jpg' }
   ],
 
   /* 栏目文字列表 */

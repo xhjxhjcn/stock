@@ -11,7 +11,24 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
     });
   }
-  function img(o) { return o && o.img ? window.makeThumb(o.img.hue, o.img.kind, o.img.label) : ''; }
+  /* 真实新闻图加载失败时回退到内联 SVG，避免裂图 */
+  window.imgFallback = function (el) {
+    el.onerror = null;
+    var k = el.getAttribute('data-kind') || 'news';
+    var l = el.getAttribute('data-label') || '资讯';
+    el.src = window.makeThumb(205, k, l);
+  };
+  /* 缩略图：字符串=真实图(热链+绕过防盗链)，对象=内联SVG */
+  function img(o) {
+    if (!o || !o.img) return '';
+    var im = o.img;
+    if (typeof im === 'string') {
+      var label = o.cat || o.title || '资讯';
+      return '<img src="' + esc(im) + '" alt="' + esc(label) + '" referrerpolicy="no-referrer" loading="lazy"'
+        + ' data-kind="news" data-label="' + esc(label) + '" onerror="window.imgFallback(this)">';
+    }
+    return '<img src="' + window.makeThumb(im.hue, im.kind, im.label) + '" alt="">';
+  }
 
   /* ---------- 左栏：频道导航 ---------- */
   var navCh = ['首页', '财经', '股票', '新股', '基金', '期货', '外汇', '黄金', '理财', '银行', '保险', '房产', '汽车', '科技', '国际', '评论', '数据', '视频'];
@@ -37,7 +54,7 @@
     var col = document.getElementById('news-col'); if (!col || !N) return;
     var h = N.headline || {};
     var lead = '<div class="lead">';
-    if (h.img) lead += '<a class="lead-img" href="#" onclick="return false"><img src="' + img(h) + '" alt=""></a>';
+    if (h.img) lead += '<a class="lead-img" href="#" onclick="return false">' + img(h) + '</a>';
     lead += '<div class="lead-main"><h1>' + esc(h.title || '') + '</h1>';
     if (h.summary) lead += '<div class="lead-sum">' + esc(h.summary) + '</div>';
     if (h.links && h.links.length) {
@@ -55,14 +72,14 @@
     var cards = '<div class="cards"><div class="sec-hd"><span class="bt">焦点图览</span></div><div class="cards-row">'
       + (N.featured || []).map(function (c) {
         return '<a class="card" href="' + esc(c.u || '#') + '"' + (c.u ? ' target="_blank" rel="noopener"' : ' onclick="return false"') + '>'
-          + '<img src="' + img(c) + '" alt=""><span class="card-cat">' + esc(c.cat || '') + '</span>'
+          + img(c) + '<span class="card-cat">' + esc(c.cat || '') + '</span>'
           + '<span class="card-t">' + esc(c.t) + '</span></a>';
       }).join('') + '</div></div>';
 
     var gal = '<div class="gallery"><div class="sec-hd"><span class="bt">图片新闻</span></div><div class="gal-row">'
       + (N.gallery || []).map(function (c) {
         return '<a class="gal" href="' + esc(c.u || '#') + '"' + (c.u ? ' target="_blank" rel="noopener"' : ' onclick="return false"') + '>'
-          + '<img src="' + img(c) + '" alt=""><span class="gal-t">' + esc(c.t) + '</span></a>';
+          + img(c) + '<span class="gal-t">' + esc(c.t) + '</span></a>';
       }).join('') + '</div></div>';
 
     /* 栏目文字列表：分两列排 */

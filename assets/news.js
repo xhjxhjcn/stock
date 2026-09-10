@@ -108,17 +108,18 @@
     }).join('') + '</ol>';
   }
 
-  /* ---------- 右栏：热点专题（静态示例） ---------- */
+  /* ---------- 右栏：热点专题（feed.js 实时覆盖，失败用静态兜底） ---------- */
   function renderTopic() {
     var el = document.getElementById('topic-list'); if (!el) return;
-    var topics = [
+    var topics = (N.topics && N.topics.length) ? N.topics : [
       { t: '专题：中长期资金入市路线图', u: 'https://finance.sina.com.cn' },
       { t: '图解：一图读懂8月经济数据', u: 'https://www.stats.gov.cn' },
-      { t: '专栏：结构工程师的资产配置笔记', u: 'https://www.xhja.cn' },
+      { t: '专栏：星瀚财经 · 资产配置笔记', u: 'https://www.xhja.cn' },
       { t: '数据：北向资金持股变动榜', u: 'https://data.eastmoney.com/hsgt/' }
     ];
     el.innerHTML = '<ul class="mini-list">' + topics.map(function (t) {
-      return '<li><span><a href="' + esc(t.u) + '" target="_blank" rel="noopener">' + esc(t.t) + '</a></span></li>';
+      return '<li><span><a href="' + esc(t.u) + '" target="_blank" rel="noopener"'
+        + (t.s ? ' title="来源：' + esc(t.s) + '"' : '') + '>' + esc(t.t) + '</a></span></li>';
     }).join('') + '</ul>';
   }
 

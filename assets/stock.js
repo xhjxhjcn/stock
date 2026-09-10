@@ -142,18 +142,122 @@
     setTimeout(loop, isTrading() ? 8000 : 60000);
   }
 
-  /* 编辑弹窗 */
-  function openEdit() {
-    document.getElementById('edit-codes').value = getCodes().join('\n');
-    document.getElementById('edit-modal').style.display = 'flex';
+  /* ===== 编辑弹窗（自动识别市场） ===== */
+  var draft = [];
+  var suggestItems = [];
+  var suggestReq = 0;
+
+  /* 仅给数字/名称，自动判断市场前缀 */
+  function detectMarket(raw) {
+    if (!raw) return null;
+    raw = String(raw).trim().toLowerCase();
+    var m = raw.match(/^(sh|sz|bj|hk)\s*([0-9]{4,6})$/);
+    if (m) {
+      var p = m[1], num = m[2];
+      if (p === 'hk') num = ('00000' + num).slice(-5);
+      return p + num;
+    }
+    var digits = raw.replace(/[^0-9]/g, '');
+    if (digits.length === 6) {
+      var d = digits[0];
+      if (d === '6' || d === '9' || d === '5') return 'sh' + digits;                 // 沪：主板/科创/ETF/债/指数
+      if (d === '0' || d === '3' || d === '2' || d === '1') return 'sz' + digits;     // 深：主板/创业/ETF/债/B股
+      if (d === '8' || d === '4') return 'bj' + digits;                               // 北交所/老三板
+      return 'sh' + digits;
+    }
+    if (digits.length >= 4 && digits.length <= 5) return 'hk' + ('00000' + digits).slice(-5); // 港股 5 位
+    return null;
   }
-  function closeEdit() { document.getElementById('edit-modal').style.display = 'none'; }
+
+  function openEdit() {
+    draft = getCodes().slice();
+    renderChips();
+    var ta = document.getElementById('edit-codes'); if (ta) ta.value = '';
+    var ai = document.getElementById('add-input'); if (ai) ai.value = '';
+    hideSuggest();
+    var md = document.getElementById('edit-modal'); if (md) md.style.display = 'flex';
+    if (ai) ai.focus();
+  }
+  function closeEdit() { var md = document.getElementById('edit-modal'); if (md) md.style.display = 'none'; hideSuggest(); }
+
+  function renderChips() {
+    var box = document.getElementById('chip-list'); if (!box) return;
+    if (!draft.length) { box.innerHTML = '<span class="chips-empty">暂无自选，添加几只吧</span>'; return; }
+    box.innerHTML = draft.map(function (c, i) {
+      return '<span class="chip"><b>' + esc(c.toUpperCase()) + '</b><span class="x" data-i="' + i + '" title="移除">×</span></span>';
+    }).join('');
+  }
+  function pushDraft(code) {
+    code = String(code).toLowerCase();
+    if (!/^(sh|sz|bj|hk)\d{4,6}$/.test(code)) return;
+    if (draft.indexOf(code) < 0) draft.push(code);
+    renderChips();
+  }
+  function removeDraft(i) { if (i >= 0 && i < draft.length) { draft.splice(i, 1); renderChips(); } }
+
+  function clearInput() { var ai = document.getElementById('add-input'); if (ai) ai.value = ''; hideSuggest(); }
+  function flashTip(msg) {
+    var t = document.getElementById('edit-tip');
+    if (t) { t.textContent = msg; t.style.color = '#c0392b'; setTimeout(function () { t.style.color = ''; }, 2500); }
+  }
+  function addFromInput() {
+    var v = (document.getElementById('add-input').value || '').trim();
+    if (!v) return;
+    var code = detectMarket(v);
+    if (code) { pushDraft(code); clearInput(); return; }
+    if (suggestItems.length) { pushDraft(suggestItems[0].code); clearInput(); return; }
+    flashTip('未识别，请直接写代码，或从下拉结果中选择');
+  }
+
+  /* 腾讯智能提示：名称/代码 → 直接带市场前缀 */
+  function fetchSuggest(q) {
+    var reqId = ++suggestReq;
+    var s = document.createElement('script');
+    s.src = 'https://smartbox.gtimg.cn/s3/?v=2&t=all&q=' + encodeURIComponent(q);
+    s.onload = function () {
+      if (s.parentNode) s.parentNode.removeChild(s);
+      if (reqId !== suggestReq) return;       // 仅采用最后一次请求
+      parseSuggest(window.v_hint, q);
+    };
+    s.onerror = function () { if (s.parentNode) s.parentNode.removeChild(s); };
+    document.head.appendChild(s);
+    setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 6000);
+  }
+  function parseSuggest(raw, q) {
+    if (!raw || typeof raw !== 'string') { hideSuggest(); return; }
+    var ql = q.toLowerCase().replace(/[^0-9a-z]/g, '');
+    var items = raw.split('^').map(function (seg) {
+      var p = seg.split('~');
+      var prefix = (p[0] || '').toLowerCase();
+      var num = p[1] || '';
+      if (!/^(sh|sz|bj|hk)$/.test(prefix) || !/^\d+$/.test(num)) return null;
+      return { code: prefix + num, name: p[2] || num };
+    }).filter(Boolean).filter(function (it) {
+      return it.code.indexOf(ql) >= 0 || it.name.toLowerCase().indexOf(ql) >= 0;
+    });
+    suggestItems = items.slice(0, 12);
+    showSuggest();
+  }
+  function showSuggest() {
+    var box = document.getElementById('suggest'); if (!box) return;
+    if (!suggestItems.length) { box.style.display = 'none'; return; }
+    box.innerHTML = suggestItems.map(function (it, i) {
+      var mk = it.code.slice(0, 2).toUpperCase();
+      return '<div class="sg" data-i="' + i + '"><span class="nm">' + esc(it.name) + '</span>'
+        + '<span class="cd">' + it.code.toUpperCase() + '</span><span class="mk">' + mk + '</span></div>';
+    }).join('');
+    box.style.display = 'block';
+  }
+  function hideSuggest() { var box = document.getElementById('suggest'); if (box) box.style.display = 'none'; suggestItems = []; }
+
   function saveEdit() {
+    var codes = draft.slice();
     var v = document.getElementById('edit-codes').value || '';
-    var codes = v.split(/[\s,，;；]+/).map(function (s) { return s.trim().toLowerCase(); }).filter(Boolean)
-      .filter(function (c) { return /^(sh|sz|bj|hk)\d{4,6}$/.test(c); });
-    if (!codes.length) { alert('没有有效代码，格式如 sh600519 / sz300750 / hk00700'); return; }
+    v.split(/[\s,，;；]+/).map(function (s) { return s.trim(); }).filter(Boolean).forEach(function (s) {
+      var c = detectMarket(s); if (c) codes.push(c);
+    });
     codes = Array.from(new Set(codes));
+    if (!codes.length) { flashTip('还没有任何股票，先添加几只吧'); return; }
     setCodes(codes);
     closeEdit();
     refresh();
@@ -175,6 +279,30 @@
   document.getElementById('btn-save').addEventListener('click', saveEdit);
   document.getElementById('btn-cancel').addEventListener('click', closeEdit);
   document.getElementById('edit-modal').addEventListener('click', function (e) { if (e.target === this) closeEdit(); });
+
+  var addInput = document.getElementById('add-input');
+  if (addInput) {
+    addInput.addEventListener('input', function () {
+      var q = addInput.value.trim();
+      if (q.length >= 1) fetchSuggest(q); else hideSuggest();
+    });
+    addInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); addFromInput(); }
+    });
+    addInput.addEventListener('blur', function () { setTimeout(hideSuggest, 150); });
+  }
+  var btnAdd = document.getElementById('btn-add'); if (btnAdd) btnAdd.addEventListener('click', addFromInput);
+  var chipList = document.getElementById('chip-list');
+  if (chipList) chipList.addEventListener('click', function (e) {
+    var x = e.target.closest('.x'); if (x) removeDraft(parseInt(x.getAttribute('data-i'), 10));
+  });
+  var suggestBox = document.getElementById('suggest');
+  if (suggestBox) suggestBox.addEventListener('mousedown', function (e) {
+    var sg = e.target.closest('.sg'); if (!sg) return;
+    e.preventDefault();
+    var it = suggestItems[parseInt(sg.getAttribute('data-i'), 10)];
+    if (it) { pushDraft(it.code); clearInput(); }
+  });
 
   (function () {
     var d = new Date();

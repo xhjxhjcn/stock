@@ -1,0 +1,111 @@
+/* ===== 小站财经 — 仿 QQ/163 门户风格 ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font: 12px/1.7 "宋体", SimSun, "Microsoft YaHei", Arial, sans-serif;
+  color: #333; background: #fff;
+}
+a { color: #333; text-decoration: none; }
+a:hover { color: #c00; text-decoration: underline; }
+code { font-family: Consolas, Menlo, monospace; background: #f4f4f4; padding: 0 3px; border-radius: 3px; color: #c00; }
+
+/* 顶部细条 */
+.topbar { background: #f5f5f5; border-bottom: 1px solid #eee; font-size: 12px; color: #666; }
+.topbar-inner { width: 1000px; margin: 0 auto; padding: 4px 0; display: flex; justify-content: space-between; }
+.topbar-right a { color: #666; }
+.topbar-right .sep { color: #ccc; margin: 0 6px; }
+
+/* logo + 搜索 */
+.header { width: 1000px; margin: 0 auto; padding: 14px 0; }
+.header-inner { display: flex; align-items: center; justify-content: space-between; }
+.logo { display: flex; align-items: baseline; gap: 10px; }
+.logo-cn { font: 30px/1 "Microsoft YaHei", sans-serif; color: #c00; font-weight: 700; letter-spacing: 2px; }
+.logo-en { font: 13px/1 Arial; color: #999; letter-spacing: 2px; }
+.logo-sub { font-size: 12px; color: #999; }
+.search { display: flex; }
+.search input { width: 320px; height: 34px; border: 2px solid #c00; border-right: none; padding: 0 10px; outline: none; font-size: 13px; }
+.search button { width: 72px; height: 34px; border: none; background: #c00; color: #fff; font-size: 14px; cursor: pointer; }
+.search button:hover { background: #a00; }
+
+/* 红色频道导航 */
+.nav { background: #c00; }
+.nav-inner { width: 1000px; margin: 0 auto; display: flex; }
+.nav-inner a { color: #fff; padding: 0 16px; line-height: 38px; font-size: 15px; display: block; }
+.nav-inner a:hover { background: #a00; text-decoration: none; }
+.nav-home { background: #a00; font-weight: 700; }
+
+/* 主体布局 */
+.wrap { width: 1000px; margin: 12px auto; display: flex; gap: 14px; align-items: flex-start; }
+.col-main { width: 680px; flex: none; }
+.col-side { width: 306px; flex: none; }
+
+/* 头条区 */
+.headline { border: 1px solid #eee; padding: 14px 16px 10px; margin-bottom: 12px; }
+.headline h1 { text-align: center; font: 26px/1.3 "Microsoft YaHei", sans-serif; color: #c00; margin-bottom: 8px; }
+.headline .summary { color: #555; text-align: center; font-size: 13px; margin-bottom: 10px; }
+.headline .hl-links { border-top: 1px dashed #ddd; padding-top: 8px; display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; }
+.headline .hl-links a { color: #1a5fb4; }
+
+/* 新闻区块 */
+.block { border: 1px solid #eee; margin-bottom: 12px; }
+.block-hd { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #c00; padding: 0 10px; background: #fafafa; }
+.block-hd .bt { color: #c00; font: 15px/30px "Microsoft YaHei", sans-serif; font-weight: 700; border-left: 4px solid #c00; padding-left: 8px; margin-left: -10px; }
+.block-hd .more { color: #999; font-size: 12px; }
+.block-bd { padding: 8px 12px; }
+.block-bd ul { list-style: none; }
+.block-bd li { line-height: 26px; border-bottom: 1px dotted #eee; display: flex; justify-content: space-between; }
+.block-bd li:last-child { border-bottom: none; }
+.block-bd li .t { color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.block-bd li .t:before { content: "·"; color: #c00; margin-right: 6px; font-weight: 700; }
+.block-bd li .date { color: #bbb; font-size: 11px; flex: none; margin-left: 10px; }
+
+.loading { color: #999; padding: 20px; text-align: center; }
+
+/* 右栏盒子 */
+.box { border: 1px solid #d6e4f0; margin-bottom: 12px; background: #fff; }
+.box-hd { display: flex; justify-content: space-between; align-items: center; background: #eaf2fb; border-bottom: 1px solid #d6e4f0; padding: 0 10px; }
+.box-title { color: #0a5bb5; font: 14px/30px "Microsoft YaHei", sans-serif; font-weight: 700; }
+.box-ops a { color: #0a5bb5; font-size: 12px; margin-left: 8px; }
+.box-bd { padding: 8px 10px; }
+.box-ft { padding: 4px 10px; border-top: 1px solid #eee; color: #999; font-size: 11px; text-align: right; }
+
+/* 股票小窗 */
+.stock-box { border-color: #c00; }
+.stock-box .box-hd { background: #fff4f4; border-bottom: 1px solid #f0cccc; }
+.stock-box .box-title { color: #c00; }
+.stock-box .box-ops a { color: #c00; }
+.stock-table { width: 100%; border-collapse: collapse; }
+.stock-table th { font-weight: normal; color: #999; font-size: 11px; text-align: right; padding: 3px 2px; border-bottom: 1px solid #f0f0f0; }
+.stock-table th:first-child { text-align: left; }
+.stock-table td { padding: 5px 2px; border-bottom: 1px dotted #eee; text-align: right; font-size: 13px; }
+.stock-table td.name { text-align: left; color: #333; }
+.stock-table td.name b { color: #222; }
+.stock-table td.name small { color: #aaa; font-weight: normal; }
+.stock-table tr.idx td.name { color: #0a5bb5; }
+.up { color: #e22 !important; }      /* 红涨 */
+.down { color: #0a9a4a !important; }  /* 绿跌 */
+.flat { color: #999 !important; }
+.arrow { font-size: 10px; }
+
+/* 迷你列表（基金/外汇） */
+.mini-list { list-style: none; }
+.mini-list li { display: flex; justify-content: space-between; line-height: 26px; border-bottom: 1px dotted #eee; }
+.mini-list li:last-child { border-bottom: none; }
+.mini-list li span:last-child { font-weight: 700; }
+
+/* 页脚 */
+.footer { width: 1000px; margin: 20px auto; border-top: 1px solid #eee; padding-top: 12px; text-align: center; color: #999; font-size: 12px; }
+.footer a { color: #1a5fb4; }
+
+/* 编辑弹窗 */
+.modal-mask { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 999; align-items: center; justify-content: center; }
+.modal { width: 420px; background: #fff; border: 1px solid #c00; border-radius: 4px; overflow: hidden; }
+.modal-hd { background: #c00; color: #fff; padding: 8px 14px; font: 15px/1.4 "Microsoft YaHei", sans-serif; }
+.modal-bd { padding: 14px; }
+.modal-bd .tip { color: #666; margin-bottom: 8px; font-size: 12px; }
+.modal-bd textarea { width: 100%; border: 1px solid #ccc; padding: 8px; font-size: 13px; font-family: Consolas, monospace; outline: none; resize: vertical; }
+.modal-bd textarea:focus { border-color: #c00; }
+.modal-ft { padding: 10px 14px; text-align: right; border-top: 1px solid #eee; }
+.btn-primary { background: #c00; color: #fff; border: none; padding: 6px 18px; cursor: pointer; font-size: 13px; margin-left: 8px; }
+.btn-primary:hover { background: #a00; }
+.btn-default { background: #f4f4f4; color: #333; border: 1px solid #ccc; padding: 6px 18px; cursor: pointer; font-size: 13px; }
+.btn-default:hover { background: #eee; }

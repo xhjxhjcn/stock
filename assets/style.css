@@ -1,4 +1,4 @@
-/* ===== 小站财经 — 仿 QQ/163 门户风格（三栏版） ===== */
+/* ===== 星瀚财经 — 仿 QQ/163 门户风格（三栏版） ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font: 12px/1.7 "宋体", SimSun, "Microsoft YaHei", Arial, sans-serif; color: #333; background: #fff; }
 a { color: #333; text-decoration: none; }
@@ -131,6 +131,12 @@ code { font-family: Consolas, Menlo, monospace; background: #f4f4f4; padding: 0 
 .stock-table td.name b { color: #222; }
 .stock-table td.name small { color: #aaa; font-weight: normal; }
 .stock-table tr.idx td.name { color: #0a5bb5; }
+
+/* 自选股：迷你分时走势图 */
+.stock-table th.th-spark { text-align: center; }
+.stock-table td.spark { width: 62px; text-align: center; padding: 2px 0; }
+.spark-svg { display: block; margin: 0 auto; }
+.spark-na { color: #ccc; }
 
 /* 头条榜 */
 .rank { list-style: none; counter-reset: r; }
